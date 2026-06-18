@@ -6,6 +6,7 @@
 *.7z
 *.rar
 WORK_LOG.md
+results/analysis_summary_*.txt
 
 # Исходные данные задания не должны попадать в репозиторий.
 *_magn_*.txt

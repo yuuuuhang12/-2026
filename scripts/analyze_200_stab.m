@@ -6,26 +6,56 @@
 %   200_magn_stab.txt - время, Bx, By, Bz; время рассматривается как Unix time в мс.
 %   200_lla_stab.csv  - RTC, RTC ms, высота, широта, долгота.
 %
-% Основные выходные файлы сохраняются в уже существующих каталогах:
-%   02 Work/03 Результат/figures
-%   02 Work/03 Результат/tables
-%   02 Work/03 Результат/analysis_summary_200_stab.txt
+% В репозитории исходные файлы следует поместить в каталог:
+%   data
+%
+% Основные выходные файлы сохраняются в каталогах:
+%   results/figures
+%   results/tables
+%   results/summaries/analysis_summary_200_stab.txt
 
 clear; clc; close all;
 
 %% Определение рабочих каталогов
 scriptDir = fileparts(mfilename('fullpath'));
-workDir = fullfile(scriptDir, '..', '..');
-taskDir = findNumberedSubdir(workDir, '01 ');
-resultDir = findNumberedSubdir(workDir, '03 ');
+repoDir = fileparts(scriptDir);
+taskDir = fullfile(repoDir, 'data');
+resultDir = fullfile(repoDir, 'results');
 figDir = fullfile(resultDir, 'figures');
 tableDir = fullfile(resultDir, 'tables');
+summaryDir = fullfile(resultDir, 'summaries');
 
 if ~exist(figDir, 'dir'); mkdir(figDir); end
 if ~exist(tableDir, 'dir'); mkdir(tableDir); end
+if ~exist(summaryDir, 'dir'); mkdir(summaryDir); end
 
 magFile = fullfile(taskDir, '200_magn_stab.txt');
 navFile = fullfile(taskDir, '200_lla_stab.csv');
+
+% Для совместимости с исходной рабочей структурой выполняется резервный
+% поиск файлов в каталоге "02 Work/01 Задание". В обычном Git-сценарии
+% достаточно поместить исходные файлы в каталог data рядом с scripts.
+if ~isfile(magFile) || ~isfile(navFile)
+    legacyWorkDirs = {fullfile(scriptDir, '..', '..', '..'), fullfile(scriptDir, '..', '..')};
+    for legacyIndex = 1:numel(legacyWorkDirs)
+        legacyTaskDir = findNumberedSubdirIfExists(legacyWorkDirs{legacyIndex}, '01 ');
+        if strlength(legacyTaskDir) > 0
+            legacyMagFile = fullfile(legacyTaskDir, '200_magn_stab.txt');
+            legacyNavFile = fullfile(legacyTaskDir, '200_lla_stab.csv');
+            if isfile(legacyMagFile) && isfile(legacyNavFile)
+                taskDir = legacyTaskDir;
+                magFile = legacyMagFile;
+                navFile = legacyNavFile;
+                break;
+            end
+        end
+    end
+end
+
+if ~isfile(magFile) || ~isfile(navFile)
+    error(['Не найдены входные файлы 200_magn_stab.txt и 200_lla_stab.csv. ', ...
+        'Поместите их в каталог data внутри репозитория.']);
+end
 
 fprintf('Чтение файла магнитометра: %s\n', magFile);
 magRaw = readmatrix(magFile, 'FileType', 'text');
@@ -120,7 +150,7 @@ plotSmoothedMagneticNorm(magTime, Bnorm, mostCommonDtMs, figDir);
 plotGroundTrack(nav.lonDeg, nav.latDeg, nav.altM, figDir);
 
 fprintf('Запись текстового резюме...\n');
-summaryFile = fullfile(resultDir, 'analysis_summary_200_stab.txt');
+summaryFile = fullfile(summaryDir, 'analysis_summary_200_stab.txt');
 writeSummary(summaryFile, cleaningStats, timeStats, BnormStats, syncStats, orbitStats, ...
     latPeakTimesMs, latPeakValues);
 
@@ -141,6 +171,21 @@ function folderPath = findNumberedSubdir(parentDir, prefix)
     end
 
     folderPath = fullfile(parentDir, matches(1).name);
+end
+
+function folderPath = findNumberedSubdirIfExists(parentDir, prefix)
+    folderPath = "";
+    if ~exist(parentDir, 'dir')
+        return;
+    end
+
+    entries = dir(parentDir);
+    isWanted = [entries.isdir] & startsWith({entries.name}, prefix);
+    matches = entries(isWanted);
+
+    if ~isempty(matches)
+        folderPath = string(fullfile(parentDir, matches(1).name));
+    end
 end
 
 function [magClean, counters, typicalStepMs] = cleanMagnetometerData(magRaw)
