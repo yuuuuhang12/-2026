@@ -477,47 +477,29 @@ end
 
 function plotGroundTrack(lonDeg, latDeg, altM, figDir)
     fig = figure('Color', 'w', 'Position', [120 120 1100 620]);
-    usedMapBackground = false;
+    hold on;
 
-    if exist('geoscatter', 'file') == 2 && exist('geobasemap', 'file') == 2
-        try
-            geoscatter(latDeg, lonDeg, 28, altM / 1000, 'filled');
-            geobasemap('grayland');
-            title('Наземный трек спутника с цветовым отображением высоты, 200\_lla\_stab');
-            cb = colorbar;
-            cb.Label.String = 'Высота, км';
-            colormap(turbo);
-            hold on;
-            geoscatter(latDeg(1), lonDeg(1), 55, 'g', 'filled');
-            geoscatter(latDeg(end), lonDeg(end), 55, 'r', 'filled');
-            legend({'Точки трека', 'Начало', 'Конец'}, 'Location', 'southoutside', 'Orientation', 'horizontal');
-            usedMapBackground = true;
-            fprintf('Наземный трек построен на картографической подложке MATLAB.\n');
-        catch ME
-            fprintf('Картографическая подложка недоступна: %s\n', ME.message);
-            fprintf('Будет построен обычный график долгота-широта.\n');
-            clf(fig);
-        end
-    else
-        fprintf('Картографические функции MATLAB недоступны. Будет построен обычный график долгота-широта.\n');
-    end
+    coast = load('coastlines');
+    plot(coast.coastlon, coast.coastlat, 'Color', [0.65 0.65 0.65], ...
+        'LineWidth', 0.6, 'HandleVisibility', 'off');
 
-    if ~usedMapBackground
-        scatter(lonDeg, latDeg, 28, altM / 1000, 'filled');
-        grid on;
-        xlim([-180 180]);
-        ylim([-90 90]);
-        xlabel('Долгота, град');
-        ylabel('Широта, град');
-        title('Наземный трек спутника с цветовым отображением высоты, 200\_lla\_stab');
-        cb = colorbar;
-        cb.Label.String = 'Высота, км';
-        colormap(turbo);
-        hold on;
-        plot(lonDeg(1), latDeg(1), 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 7);
-        plot(lonDeg(end), latDeg(end), 'rs', 'MarkerFaceColor', 'r', 'MarkerSize', 7);
-        legend({'Точки трека', 'Начало', 'Конец'}, 'Location', 'southoutside', 'Orientation', 'horizontal');
-    end
+    hTrack = scatter(lonDeg, latDeg, 28, altM / 1000, 'filled');
+    hStart = plot(lonDeg(1), latDeg(1), 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 7);
+    hEnd = plot(lonDeg(end), latDeg(end), 'rs', 'MarkerFaceColor', 'r', 'MarkerSize', 7);
+
+    xlabel('Долгота, град');
+    ylabel('Широта, град');
+    title('Наземный трек спутника с цветовым отображением высоты, 200_lla_stab', 'Interpreter', 'none');
+    cb = colorbar;
+    cb.Label.String = 'Высота, км';
+    colormap(turbo);
+    xlim([-180 180]);
+    ylim([-90 90]);
+    pbaspect([2 1 1]);
+    grid on;
+    box on;
+    legend([hTrack, hStart, hEnd], {'Точки трека', 'Начало', 'Конец'}, ...
+        'Location', 'southoutside', 'Orientation', 'horizontal');
 
     exportgraphics(fig, fullfile(figDir, 'ground_track_altitude_200_stab.png'), 'Resolution', 300);
     savefig(fig, fullfile(figDir, 'ground_track_altitude_200_stab.fig'));
