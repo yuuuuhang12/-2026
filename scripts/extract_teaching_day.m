@@ -56,8 +56,8 @@ function plotDayGroundTrack(dayData, targetDay, figureDir, targetTag)
     hold on;
     plot(dayData.longitude_deg, dayData.latitude_deg, "-", "Color", [0.05 0.20 0.55], "LineWidth", 0.9);
     scatter(dayData.longitude_deg, dayData.latitude_deg, 18, dayData.altitude_km, "filled");
-    xlabel("Долгота, град");
-    ylabel("Широта, град");
+    xlabel("Долгота");
+    ylabel("Широта");
     title("Наземный трек учебного набора данных за " + string(targetDay, "yyyy-MM-dd"));
     cb = colorbar;
     cb.Label.String = "Высота, км";
@@ -87,8 +87,8 @@ function plotDayGroundTrackMagneticNorm(dayData, targetDay, figureDir, targetTag
     drawWorldMapBackground();
     hold on;
     scatter(dayData.longitude_deg, dayData.latitude_deg, 22, dayData.B_teaching_mGs, "filled");
-    xlabel("Долгота, град");
-    ylabel("Широта, град");
+    xlabel("Долгота");
+    ylabel("Широта");
     title("Наземный трек за " + string(targetDay, "yyyy-MM-dd") + ": цветом показан модуль магнитного поля");
     cb = colorbar;
     cb.Label.String = "|B|, мГс";

@@ -493,8 +493,8 @@ function plotTeachingDataset(teaching, outputFigureDir)
     drawWorldMapBackground();
     hold on;
     scatter(teaching.longitudeDeg, teaching.latitudeDeg, 10, teaching.altitudeKm, "filled");
-    xlabel("Longitude, deg");
-    ylabel("Latitude, deg");
+    xlabel("Longitude");
+    ylabel("Latitude");
     title("Teaching dataset ground track with altitude color");
     cb = colorbar;
     cb.Label.String = "Altitude, km";

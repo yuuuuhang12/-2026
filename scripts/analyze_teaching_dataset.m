@@ -157,8 +157,8 @@ function plotGroundTrackAltitude(lonDeg, latDeg, altM, figureDir)
     drawWorldMapBackground();
     hold on;
     scatter(lonDeg, latDeg, 18, altM / 1000, "filled");
-    xlabel("Долгота, град");
-    ylabel("Широта, град");
+    xlabel("Долгота");
+    ylabel("Широта");
     title("Наземный трек учебного набора данных: цветом показана высота");
     cb = colorbar;
     cb.Label.String = "Высота, км";
@@ -172,8 +172,8 @@ function plotGroundTrackMagneticNorm(lonDeg, latDeg, Bnorm, figureDir)
     drawWorldMapBackground();
     hold on;
     scatter(lonDeg, latDeg, 18, Bnorm, "filled");
-    xlabel("Долгота, град");
-    ylabel("Широта, град");
+    xlabel("Долгота");
+    ylabel("Широта");
     title("Наземный трек учебного набора данных: цветом показан модуль магнитного поля");
     cb = colorbar;
     cb.Label.String = "|B|, мГс";
