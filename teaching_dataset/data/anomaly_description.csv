@@ -1,0 +1,9 @@
+anomaly_id,anomaly_type,start_time_utc,end_time_utc,affected_columns,injection_method,severity,expected_student_observation,teacher_note
+A001,altitude_jump,2026-01-18T12:01:00Z,2026-01-18T12:03:50Z,altitude_km,"altitude_km = altitude_km + 65.0",easy,Sudden unrealistic altitude discontinuity.,Good for checking orbital altitude continuity.
+A002,latlon_jump,2026-02-10T09:22:30Z,2026-02-10T09:25:10Z,latitude_deg;longitude_deg,"lat += 42.0, lon += -95.0",easy,Ground track suddenly moves to an inconsistent location.,Good for map-based continuity analysis.
+A003,magnetic_spike,2026-03-07T11:20:30Z,2026-03-07T11:21:30Z,B_teaching_mGs,"B_teaching_mGs += 180.0",easy,Short high magnetic-field spike.,Visible in |B| time series.
+A004,magnetic_drop,2026-04-13T12:46:40Z,2026-04-13T12:53:20Z,B_teaching_mGs,"B_teaching_mGs += -130.0",medium,Local magnetic-field depression.,Requires comparing with local trend or IGRF baseline.
+A005,magnetic_step,2026-05-11T16:07:20Z,2026-05-11T16:27:00Z,B_teaching_mGs,"constant offset 55.0 mGs",medium,Longer step-like magnetic-field offset.,Good for residual analysis against IGRF.
+A006,nan_block,2026-05-19T19:33:30Z,2026-05-19T19:35:00Z,B_teaching_mGs,"set to NaN",hard,Missing magnetic values.,Good for basic data-quality checks.
+A007,zero_magnetic_rows,2026-05-27T08:07:40Z,2026-05-27T08:08:40Z,B_teaching_mGs,"set to zero",medium,Magnetic values become exactly zero.,Mimics invalid all-zero measurements.
+A008,zero_timestamp,1970-01-01T00:00:00Z,1970-01-01T00:00:00Z,timestamp_utc,"timestamp replaced by Unix epoch",hard,Time suddenly jumps to the epoch.,Represents timestamp corruption.
