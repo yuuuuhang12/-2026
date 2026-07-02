@@ -140,7 +140,7 @@ function [nearestIndex, syncErrorMs] = nearestNeighbor(sourceTimeMs, queryTimeMs
 end
 
 function plotMagneticNorm(magTime, Bnorm, figureDir)
-    fig = figure("Visible", "off", "Color", "w");
+    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1200 520]);
     plot(magTime, Bnorm, "Color", [0.05 0.25 0.55], "LineWidth", 0.8);
     xlabel("Время, UTC");
     ylabel("|B|, мГс");
@@ -148,37 +148,45 @@ function plotMagneticNorm(magTime, Bnorm, figureDir)
     subtitle(sprintf("Среднее %.2f мГс, СКО %.2f мГс", mean(Bnorm, "omitnan"), std(Bnorm, 1, "omitnan")));
     legend("|B|", "Location", "best");
     grid on;
-    exportgraphics(fig, fullfile(figureDir, "teaching_magnetic_norm.png"), "Resolution", 250);
+    exportgraphics(fig, fullfile(figureDir, "teaching_magnetic_norm.png"), "Resolution", 300);
     close(fig);
 end
 
 function plotGroundTrackAltitude(lonDeg, latDeg, altM, figureDir)
-    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1300 720]);
+    fig = figure("Visible", "off", "Color", "w", "Position", [120 120 1100 620]);
     drawWorldMapBackground();
     hold on;
-    scatter(lonDeg, latDeg, 18, altM / 1000, "filled");
-    xlabel("Долгота");
-    ylabel("Широта");
+    scatter(lonDeg, latDeg, 28, altM / 1000, "filled");
+    xlabel("Долгота, град");
+    ylabel("Широта, град");
     title("Наземный трек учебного набора данных: цветом показана высота");
     cb = colorbar;
     cb.Label.String = "Высота, км";
+    colormap(turbo);
+    plot(lonDeg(1), latDeg(1), "go", "MarkerFaceColor", "g", "MarkerSize", 7);
+    plot(lonDeg(end), latDeg(end), "rs", "MarkerFaceColor", "r", "MarkerSize", 7);
+    legend({"Точки трека", "Начало", "Конец"}, "Location", "southoutside", "Orientation", "horizontal");
     formatWorldMapAxes();
-    exportgraphics(fig, fullfile(figureDir, "teaching_ground_track_altitude.png"), "Resolution", 250);
+    exportgraphics(fig, fullfile(figureDir, "teaching_ground_track_altitude.png"), "Resolution", 300);
     close(fig);
 end
 
 function plotGroundTrackMagneticNorm(lonDeg, latDeg, Bnorm, figureDir)
-    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1300 720]);
+    fig = figure("Visible", "off", "Color", "w", "Position", [120 120 1100 620]);
     drawWorldMapBackground();
     hold on;
-    scatter(lonDeg, latDeg, 18, Bnorm, "filled");
-    xlabel("Долгота");
-    ylabel("Широта");
+    scatter(lonDeg, latDeg, 28, Bnorm, "filled");
+    xlabel("Долгота, град");
+    ylabel("Широта, град");
     title("Наземный трек учебного набора данных: цветом показан модуль магнитного поля");
     cb = colorbar;
     cb.Label.String = "|B|, мГс";
+    colormap(turbo);
+    plot(lonDeg(1), latDeg(1), "go", "MarkerFaceColor", "g", "MarkerSize", 7);
+    plot(lonDeg(end), latDeg(end), "rs", "MarkerFaceColor", "r", "MarkerSize", 7);
+    legend({"Точки трека", "Начало", "Конец"}, "Location", "southoutside", "Orientation", "horizontal");
     formatWorldMapAxes();
-    exportgraphics(fig, fullfile(figureDir, "teaching_ground_track_magnetic_norm.png"), "Resolution", 250);
+    exportgraphics(fig, fullfile(figureDir, "teaching_ground_track_magnetic_norm.png"), "Resolution", 300);
     close(fig);
 end
 

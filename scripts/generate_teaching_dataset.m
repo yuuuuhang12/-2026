@@ -489,20 +489,24 @@ function writeTeachingReadme(outputDir)
 end
 
 function plotTeachingDataset(teaching, outputFigureDir)
-    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1300 720]);
+    fig = figure("Visible", "off", "Color", "w", "Position", [120 120 1100 620]);
     drawWorldMapBackground();
     hold on;
-    scatter(teaching.longitudeDeg, teaching.latitudeDeg, 10, teaching.altitudeKm, "filled");
-    xlabel("Longitude");
-    ylabel("Latitude");
-    title("Teaching dataset ground track with altitude color");
+    scatter(teaching.longitudeDeg, teaching.latitudeDeg, 28, teaching.altitudeKm, "filled");
+    xlabel("Долгота, град");
+    ylabel("Широта, град");
+    title("Наземный трек учебного набора данных с цветовым отображением высоты");
     cb = colorbar;
-    cb.Label.String = "Altitude, km";
+    cb.Label.String = "Высота, км";
+    colormap(turbo);
+    plot(teaching.longitudeDeg(1), teaching.latitudeDeg(1), "go", "MarkerFaceColor", "g", "MarkerSize", 7);
+    plot(teaching.longitudeDeg(end), teaching.latitudeDeg(end), "rs", "MarkerFaceColor", "r", "MarkerSize", 7);
+    legend({"Точки трека", "Начало", "Конец"}, "Location", "southoutside", "Orientation", "horizontal");
     formatWorldMapAxes();
-    exportgraphics(fig, fullfile(outputFigureDir, "ground_track.png"), "Resolution", 220);
+    exportgraphics(fig, fullfile(outputFigureDir, "ground_track.png"), "Resolution", 300);
     close(fig);
 
-    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1500 620]);
+    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1200 520]);
     plotMask = year(teaching.timestampUtc) == 2026;
     plot(teaching.timestampUtc(plotMask), teaching.BModelMGs(plotMask), "Color", [0.2 0.2 0.2], "LineWidth", 0.7);
     hold on;
@@ -515,16 +519,16 @@ function plotTeachingDataset(teaching, outputFigureDir)
     legend("IGRF model", "Teaching |B|", "Injected anomalies", "Location", "best");
     grid on;
     xlim([datetime(2026, 1, 1, "TimeZone", "UTC"), datetime(2026, 7, 1, "TimeZone", "UTC")]);
-    exportgraphics(fig, fullfile(outputFigureDir, "magnetic_field_with_anomalies.png"), "Resolution", 220);
+    exportgraphics(fig, fullfile(outputFigureDir, "magnetic_field_with_anomalies.png"), "Resolution", 300);
     close(fig);
 
-    fig = figure("Visible", "off", "Color", "w");
+    fig = figure("Visible", "off", "Color", "w", "Position", [120 120 1200 520]);
     histogram(teaching.residualMGs, 40);
     xlabel("Residual, mGs");
     ylabel("Count");
     title("Distribution of real residuals added to IGRF model");
     grid on;
-    exportgraphics(fig, fullfile(outputFigureDir, "residual_distribution.png"), "Resolution", 220);
+    exportgraphics(fig, fullfile(outputFigureDir, "residual_distribution.png"), "Resolution", 300);
     close(fig);
 end
 

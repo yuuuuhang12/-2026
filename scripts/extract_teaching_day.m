@@ -51,24 +51,28 @@ fprintf("Графики сохранены в: %s\n", figureDir);
 %% Local functions
 
 function plotDayGroundTrack(dayData, targetDay, figureDir, targetTag)
-    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1200 700]);
+    fig = figure("Visible", "off", "Color", "w", "Position", [120 120 1100 620]);
     drawWorldMapBackground();
     hold on;
     plot(dayData.longitude_deg, dayData.latitude_deg, "-", "Color", [0.05 0.20 0.55], "LineWidth", 0.9);
-    scatter(dayData.longitude_deg, dayData.latitude_deg, 18, dayData.altitude_km, "filled");
-    xlabel("Долгота");
-    ylabel("Широта");
+    scatter(dayData.longitude_deg, dayData.latitude_deg, 28, dayData.altitude_km, "filled");
+    xlabel("Долгота, град");
+    ylabel("Широта, град");
     title("Наземный трек учебного набора данных за " + string(targetDay, "yyyy-MM-dd"));
     cb = colorbar;
     cb.Label.String = "Высота, км";
+    colormap(turbo);
+    plot(dayData.longitude_deg(1), dayData.latitude_deg(1), "go", "MarkerFaceColor", "g", "MarkerSize", 7);
+    plot(dayData.longitude_deg(end), dayData.latitude_deg(end), "rs", "MarkerFaceColor", "r", "MarkerSize", 7);
+    legend({"Точки трека", "Начало", "Конец"}, "Location", "southoutside", "Orientation", "horizontal");
     formatWorldMapAxes();
-    exportgraphics(fig, fullfile(figureDir, "teaching_day_" + targetTag + "_ground_track.png"), "Resolution", 250);
+    exportgraphics(fig, fullfile(figureDir, "teaching_day_" + targetTag + "_ground_track.png"), "Resolution", 300);
     close(fig);
 end
 
 function plotDayMagneticNorm(dayData, dayTime, targetDay, figureDir, targetTag)
-    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1200 620]);
-    plot(dayTime, dayData.B_teaching_mGs, "Color", [0.05 0.25 0.65], "LineWidth", 0.9);
+    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1200 520]);
+    plot(dayTime, dayData.B_teaching_mGs, "Color", [0.05 0.25 0.65], "LineWidth", 0.8);
     hold on;
     anomalyMask = logical(dayData.is_anomaly) & isfinite(dayData.B_teaching_mGs);
     scatter(dayTime(anomalyMask), dayData.B_teaching_mGs(anomalyMask), 30, "r", "filled");
@@ -78,22 +82,26 @@ function plotDayMagneticNorm(dayData, dayTime, targetDay, figureDir, targetTag)
     legend("|B|", "Размеченные аномалии", "Location", "best");
     grid on;
     xlim([targetDay, targetDay + days(1)]);
-    exportgraphics(fig, fullfile(figureDir, "teaching_day_" + targetTag + "_magnetic_norm.png"), "Resolution", 250);
+    exportgraphics(fig, fullfile(figureDir, "teaching_day_" + targetTag + "_magnetic_norm.png"), "Resolution", 300);
     close(fig);
 end
 
 function plotDayGroundTrackMagneticNorm(dayData, targetDay, figureDir, targetTag)
-    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1200 700]);
+    fig = figure("Visible", "off", "Color", "w", "Position", [120 120 1100 620]);
     drawWorldMapBackground();
     hold on;
-    scatter(dayData.longitude_deg, dayData.latitude_deg, 22, dayData.B_teaching_mGs, "filled");
-    xlabel("Долгота");
-    ylabel("Широта");
+    scatter(dayData.longitude_deg, dayData.latitude_deg, 28, dayData.B_teaching_mGs, "filled");
+    xlabel("Долгота, град");
+    ylabel("Широта, град");
     title("Наземный трек за " + string(targetDay, "yyyy-MM-dd") + ": цветом показан модуль магнитного поля");
     cb = colorbar;
     cb.Label.String = "|B|, мГс";
+    colormap(turbo);
+    plot(dayData.longitude_deg(1), dayData.latitude_deg(1), "go", "MarkerFaceColor", "g", "MarkerSize", 7);
+    plot(dayData.longitude_deg(end), dayData.latitude_deg(end), "rs", "MarkerFaceColor", "r", "MarkerSize", 7);
+    legend({"Точки трека", "Начало", "Конец"}, "Location", "southoutside", "Orientation", "horizontal");
     formatWorldMapAxes();
-    exportgraphics(fig, fullfile(figureDir, "teaching_day_" + targetTag + "_ground_track_magnetic_norm.png"), "Resolution", 250);
+    exportgraphics(fig, fullfile(figureDir, "teaching_day_" + targetTag + "_ground_track_magnetic_norm.png"), "Resolution", 300);
     close(fig);
 end
 
