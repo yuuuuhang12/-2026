@@ -489,28 +489,32 @@ function writeTeachingReadme(outputDir)
 end
 
 function plotTeachingDataset(teaching, outputFigureDir)
-    fig = figure("Visible", "off", "Color", "w");
+    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1300 720]);
+    drawWorldMapBackground();
+    hold on;
     scatter(teaching.longitudeDeg, teaching.latitudeDeg, 10, teaching.altitudeKm, "filled");
     xlabel("Longitude, deg");
     ylabel("Latitude, deg");
     title("Teaching dataset ground track with altitude color");
     cb = colorbar;
     cb.Label.String = "Altitude, km";
-    grid on;
+    formatWorldMapAxes();
     exportgraphics(fig, fullfile(outputFigureDir, "ground_track.png"), "Resolution", 220);
     close(fig);
 
-    fig = figure("Visible", "off", "Color", "w");
-    plot(teaching.timestampUtc, teaching.BModelMGs, "Color", [0.2 0.2 0.2], "LineWidth", 0.7);
+    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1500 620]);
+    plotMask = year(teaching.timestampUtc) == 2026;
+    plot(teaching.timestampUtc(plotMask), teaching.BModelMGs(plotMask), "Color", [0.2 0.2 0.2], "LineWidth", 0.7);
     hold on;
-    plot(teaching.timestampUtc, teaching.BTeachingMGs, "Color", [0.05 0.25 0.65], "LineWidth", 0.8);
-    anomalyMask = teaching.isAnomaly & isfinite(teaching.BTeachingMGs);
+    plot(teaching.timestampUtc(plotMask), teaching.BTeachingMGs(plotMask), "Color", [0.05 0.25 0.65], "LineWidth", 0.8);
+    anomalyMask = teaching.isAnomaly & isfinite(teaching.BTeachingMGs) & plotMask;
     scatter(teaching.timestampUtc(anomalyMask), teaching.BTeachingMGs(anomalyMask), 18, "r", "filled");
     xlabel("Time, UTC");
     ylabel("|B|, mGs");
     title("IGRF baseline, residuals and injected magnetic anomalies");
     legend("IGRF model", "Teaching |B|", "Injected anomalies", "Location", "best");
     grid on;
+    xlim([datetime(2026, 1, 1, "TimeZone", "UTC"), datetime(2026, 7, 1, "TimeZone", "UTC")]);
     exportgraphics(fig, fullfile(outputFigureDir, "magnetic_field_with_anomalies.png"), "Resolution", 220);
     close(fig);
 
@@ -522,4 +526,21 @@ function plotTeachingDataset(teaching, outputFigureDir)
     grid on;
     exportgraphics(fig, fullfile(outputFigureDir, "residual_distribution.png"), "Resolution", 220);
     close(fig);
+end
+
+function drawWorldMapBackground()
+    try
+        coast = load("coastlines");
+        plot(coast.coastlon, coast.coastlat, "Color", [0.68 0.68 0.68], "LineWidth", 0.5);
+    catch
+        fprintf("Warning: coastlines data is unavailable; map background is skipped.\n");
+    end
+end
+
+function formatWorldMapAxes()
+    xlim([-180 180]);
+    ylim([-90 90]);
+    pbaspect([2 1 1]);
+    grid on;
+    box on;
 end

@@ -153,29 +153,48 @@ function plotMagneticNorm(magTime, Bnorm, figureDir)
 end
 
 function plotGroundTrackAltitude(lonDeg, latDeg, altM, figureDir)
-    fig = figure("Visible", "off", "Color", "w");
+    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1300 720]);
+    drawWorldMapBackground();
+    hold on;
     scatter(lonDeg, latDeg, 18, altM / 1000, "filled");
     xlabel("Долгота, град");
     ylabel("Широта, град");
     title("Наземный трек учебного набора данных: цветом показана высота");
     cb = colorbar;
     cb.Label.String = "Высота, км";
-    grid on;
-    axis tight;
+    formatWorldMapAxes();
     exportgraphics(fig, fullfile(figureDir, "teaching_ground_track_altitude.png"), "Resolution", 250);
     close(fig);
 end
 
 function plotGroundTrackMagneticNorm(lonDeg, latDeg, Bnorm, figureDir)
-    fig = figure("Visible", "off", "Color", "w");
+    fig = figure("Visible", "off", "Color", "w", "Position", [100 100 1300 720]);
+    drawWorldMapBackground();
+    hold on;
     scatter(lonDeg, latDeg, 18, Bnorm, "filled");
     xlabel("Долгота, град");
     ylabel("Широта, град");
     title("Наземный трек учебного набора данных: цветом показан модуль магнитного поля");
     cb = colorbar;
     cb.Label.String = "|B|, мГс";
-    grid on;
-    axis tight;
+    formatWorldMapAxes();
     exportgraphics(fig, fullfile(figureDir, "teaching_ground_track_magnetic_norm.png"), "Resolution", 250);
     close(fig);
+end
+
+function drawWorldMapBackground()
+    try
+        coast = load("coastlines");
+        plot(coast.coastlon, coast.coastlat, "Color", [0.68 0.68 0.68], "LineWidth", 0.5);
+    catch
+        fprintf("Предупреждение: данные coastlines недоступны; фон карты мира пропущен.\n");
+    end
+end
+
+function formatWorldMapAxes()
+    xlim([-180 180]);
+    ylim([-90 90]);
+    pbaspect([2 1 1]);
+    grid on;
+    box on;
 end

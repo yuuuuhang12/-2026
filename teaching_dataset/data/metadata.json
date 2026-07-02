@@ -1,6 +1,6 @@
 {
   "dataset_name": "Polytech-Universe teaching semi-synthetic magnetic dataset",
-  "created_utc": "2026-07-02T12:19:24Z",
+  "created_utc": "2026-07-02T12:35:03Z",
   "generator": "scripts/generate_teaching_dataset.m",
   "random_seed": 2.0260702E+7,
   "magnetic_model": "IGRF-14 via MATLAB igrfmagm",
