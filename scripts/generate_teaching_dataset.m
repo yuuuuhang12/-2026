@@ -10,6 +10,8 @@
 %   teaching_dataset/data/teaching_satellite_dataset.csv
 %   teaching_dataset/data/anomaly_description.csv
 %   teaching_dataset/data/metadata.json
+%   teaching_dataset/raw_like/teaching_magn_semisynth.txt
+%   teaching_dataset/raw_like/teaching_lla_semisynth.csv
 %   teaching_dataset/figures/*.png
 %   teaching_dataset/README.md
 
@@ -20,9 +22,11 @@ scriptDir = fileparts(mfilename("fullpath"));
 repoDir = fileparts(scriptDir);
 outputDir = fullfile(repoDir, "teaching_dataset");
 outputDataDir = fullfile(outputDir, "data");
+outputRawLikeDir = fullfile(outputDir, "raw_like");
 outputFigureDir = fullfile(outputDir, "figures");
 
 if ~exist(outputDataDir, "dir"); mkdir(outputDataDir); end
+if ~exist(outputRawLikeDir, "dir"); mkdir(outputRawLikeDir); end
 if ~exist(outputFigureDir, "dir"); mkdir(outputFigureDir); end
 
 magFile = findInputFile(repoDir, "200_magn_stab.txt");
@@ -72,17 +76,21 @@ teaching.qualityFlag = repmat("normal_semisynthetic", height(teaching), 1);
 
 fprintf("Injecting controlled teaching anomalies...\n");
 [teaching, anomalies] = injectTeachingAnomalies(teaching);
+teaching = addTeachingVectorComponents(teaching);
 
 fprintf("Writing CSV, metadata, README and validation figures...\n");
 teachingOutput = makeTeachingOutputTable(teaching);
 writetable(teachingOutput, fullfile(outputDataDir, "teaching_satellite_dataset.csv"));
 writetable(anomalies, fullfile(outputDataDir, "anomaly_description.csv"));
+writeRawLikeFiles(teaching, outputRawLikeDir);
 writeMetadata(outputDataDir, height(teaching), height(anomalies), magFile, navFile);
 writeTeachingReadme(outputDir);
 plotTeachingDataset(teaching, outputFigureDir);
 
 fprintf("\nTeaching dataset generation completed.\n");
 fprintf("Dataset: %s\n", fullfile(outputDataDir, "teaching_satellite_dataset.csv"));
+fprintf("Raw-like magnetometer file: %s\n", fullfile(outputRawLikeDir, "teaching_magn_semisynth.txt"));
+fprintf("Raw-like navigation file: %s\n", fullfile(outputRawLikeDir, "teaching_lla_semisynth.csv"));
 fprintf("Anomaly description: %s\n", fullfile(outputDataDir, "anomaly_description.csv"));
 fprintf("Figures: %s\n", outputFigureDir);
 
@@ -270,28 +278,59 @@ function [teaching, anomalies] = injectTeachingAnomalies(teaching)
 end
 
 function teachingOutput = makeTeachingOutputTable(teaching)
-    teachingOutput = teaching;
-    teachingOutput.Properties.VariableNames = [
-        "sample_id"
-        "timestamp_utc"
-        "month_block"
-        "segment_id"
-        "source_dataset"
-        "altitude_km"
-        "latitude_deg"
-        "longitude_deg"
-        "residual_mGs"
-        "Bx_model_nT"
-        "By_model_nT"
-        "Bz_model_nT"
-        "B_model_nT"
-        "B_model_mGs"
-        "B_teaching_mGs"
-        "is_anomaly"
-        "anomaly_type"
-        "anomaly_id"
-        "quality_flag"
-        ];
+    teachingOutput = table( ...
+        teaching.sampleId, teaching.timestampUtc, teaching.monthBlock, teaching.segmentId, teaching.sourceDataset, ...
+        teaching.altitudeKm, teaching.latitudeDeg, teaching.longitudeDeg, teaching.residualMGs, ...
+        teaching.BxModelNT, teaching.ByModelNT, teaching.BzModelNT, teaching.BModelNT, teaching.BModelMGs, ...
+        teaching.BTeachingMGs, teaching.BxTeachingMGs, teaching.ByTeachingMGs, teaching.BzTeachingMGs, ...
+        teaching.isAnomaly, teaching.anomalyType, teaching.anomalyId, teaching.qualityFlag, ...
+        'VariableNames', ["sample_id", "timestamp_utc", "month_block", "segment_id", "source_dataset", ...
+        "altitude_km", "latitude_deg", "longitude_deg", "residual_mGs", ...
+        "Bx_model_nT", "By_model_nT", "Bz_model_nT", "B_model_nT", "B_model_mGs", ...
+        "B_teaching_mGs", "Bx_teaching_mGs", "By_teaching_mGs", "Bz_teaching_mGs", ...
+        "is_anomaly", "anomaly_type", "anomaly_id", "quality_flag"]);
+end
+
+function teaching = addTeachingVectorComponents(teaching)
+    % The synthetic three-axis decomposition uses the IGRF vector direction
+    % scaled to the generated teaching modulus. It is intended for educational
+    % data processing and does not represent a spacecraft body-frame sensor.
+    BxModelMGs = teaching.BxModelNT * 0.01;
+    ByModelMGs = teaching.ByModelNT * 0.01;
+    BzModelMGs = teaching.BzModelNT * 0.01;
+
+    scale = teaching.BTeachingMGs ./ teaching.BModelMGs;
+    invalidScale = ~isfinite(scale) | ~isfinite(teaching.BTeachingMGs) | ...
+        ~isfinite(teaching.BModelMGs) | teaching.BModelMGs == 0;
+    scale(invalidScale) = NaN;
+
+    teaching.BxTeachingMGs = BxModelMGs .* scale;
+    teaching.ByTeachingMGs = ByModelMGs .* scale;
+    teaching.BzTeachingMGs = BzModelMGs .* scale;
+end
+
+function writeRawLikeFiles(teaching, outputRawLikeDir)
+    timeMs = round(posixtime(teaching.timestampUtc) * 1000);
+    zeroTimestampRows = teaching.anomalyType == "zero_timestamp";
+    timeMs(zeroTimestampRows) = 0;
+
+    magneticMatrix = [timeMs, teaching.BxTeachingMGs, teaching.ByTeachingMGs, teaching.BzTeachingMGs];
+    writematrix(magneticMatrix, fullfile(outputRawLikeDir, "teaching_magn_semisynth.txt"), ...
+        "FileType", "text", "Delimiter", "tab");
+
+    rtcText = strings(height(teaching), 1);
+    for i = 1:height(teaching)
+        if zeroTimestampRows(i)
+            rtcText(i) = "01-01-1970 00:00:00:000";
+        else
+            rtcText(i) = string(teaching.timestampUtc(i), "dd-MM-uuuu HH:mm:ss:SSS");
+        end
+    end
+
+    navOut = table(rtcText, timeMs, teaching.altitudeKm * 1000, teaching.latitudeDeg, teaching.longitudeDeg, ...
+        'VariableNames', ["RTC", "RTC ms", "alt m", "lat deg", "lon deg"]);
+    writetable(navOut, fullfile(outputRawLikeDir, "teaching_lla_semisynth.csv"), ...
+        "Delimiter", ";", "FileType", "text");
 end
 
 function [teaching, rows] = addAltitudeJump(teaching, rows, id, segmentId, localStart, localEnd, deltaKm, severity)
@@ -423,6 +462,9 @@ function writeTeachingReadme(outputDir)
     fprintf(fid, "- `data/teaching_satellite_dataset.csv` — основной набор данных.\n");
     fprintf(fid, "- `data/anomaly_description.csv` — описание внесенных аномалий.\n");
     fprintf(fid, "- `data/metadata.json` — параметры генерации и единицы измерения.\n");
+    fprintf(fid, "- `raw_like/teaching_magn_semisynth.txt` — учебный файл магнитометра в формате, похожем на исходное задание.\n");
+    fprintf(fid, "- `raw_like/teaching_lla_semisynth.csv` — учебный файл навигации в формате, похожем на исходное задание.\n");
+    fprintf(fid, "- `processed/` — таблицы повторного анализа raw-like файлов.\n");
     fprintf(fid, "- `figures/` — контрольные графики.\n\n");
     fprintf(fid, "## Основные поля\n\n");
     fprintf(fid, "- `timestamp_utc` — время точки в UTC.\n");
@@ -431,6 +473,16 @@ function writeTeachingReadme(outputDir)
     fprintf(fid, "- `residual_mGs` — остаток, оцененный по реальным данным.\n");
     fprintf(fid, "- `B_teaching_mGs` — учебное значение после добавления остатка и аномалий.\n");
     fprintf(fid, "- `is_anomaly`, `anomaly_type`, `anomaly_id` — разметка учебных аномалий.\n\n");
+    fprintf(fid, "## Raw-like формат\n\n");
+    fprintf(fid, "`teaching_magn_semisynth.txt` не содержит заголовок и имеет четыре столбца: `time_ms`, `Bx_mGs`, `By_mGs`, `Bz_mGs`.\n");
+    fprintf(fid, "`teaching_lla_semisynth.csv` имеет заголовок `RTC;RTC ms;alt m;lat deg;lon deg`.\n");
+    fprintf(fid, "Трехосевая декомпозиция магнитного поля является учебной: направление берется из IGRF-14 и масштабируется по сгенерированному модулю `|B|`.\n\n");
+    fprintf(fid, "## Повторный анализ\n\n");
+    fprintf(fid, "Для проверки raw-like файлов выполните в MATLAB:\n\n");
+    fprintf(fid, "```matlab\n");
+    fprintf(fid, "analyze_teaching_dataset\n");
+    fprintf(fid, "```\n\n");
+    fprintf(fid, "Скрипт строит график `|B|`, наземный трек с цветом по высоте и наземный трек с цветом по модулю магнитного поля.\n\n");
     fprintf(fid, "## Ограничение\n\n");
     fprintf(fid, "Данные являются полусинтетическими и не должны использоваться как научные наблюдения.\n");
     fclose(fid);

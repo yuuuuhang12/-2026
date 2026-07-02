@@ -8,6 +8,7 @@
   - `analyze_200_stab.m`
   - `analyze_201_ori.m`
   - `generate_teaching_dataset.m`
+  - `analyze_teaching_dataset.m`
 - `data/` — локальный каталог для исходных файлов, не сохраняемых в Git.
 - `results/figures/` — PNG-графики для отчета.
 - `results/tables/` — CSV-таблицы со статистикой обработки.
@@ -45,6 +46,7 @@ data/201_lla_ori.csv
 analyze_200_stab
 analyze_201_ori
 generate_teaching_dataset
+analyze_teaching_dataset
 ```
 
 Результаты будут записаны в каталоги:
@@ -63,3 +65,4 @@ results/summaries/analysis_summary_201_ori.txt
 - Для набора `200_stab` построены графики магнитного поля, наземного трека и таблицы статистики.
 - Для набора `201_ori` сохранены исходные результаты и дополнительная версия `201_ori_filtered`, где удалены одиночные экстремальные выбросы `|B| > 750 мГс`.
 - Для учебной задачи создан полусинтетический набор данных: орбитальная позиция, IGRF-14, реальные остатки магнитного поля и контролируемые аномалии.
+- Учебный набор дополнительно экспортируется в формате, похожем на исходные файлы задания: `raw_like/teaching_magn_semisynth.txt` и `raw_like/teaching_lla_semisynth.csv`.
