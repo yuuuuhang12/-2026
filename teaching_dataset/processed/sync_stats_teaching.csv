@@ -1,2 +1,0 @@
-sync_error_min_ms,sync_error_median_ms,sync_error_max_ms,points_matched_within_10_s,navigation_points_used,navigation_points_with_zero_time
-0,0,60000,8487,8493,3

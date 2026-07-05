@@ -1,0 +1,48 @@
+{
+  "dataset_name": "Polytech-Universe teaching semi-synthetic magnetic dataset",
+  "created_utc": "2026-07-05T05:32:00Z",
+  "generator": "Скрипты/02_учебный_набор/generate_teaching_dataset.m",
+  "random_seed": 2.0260702E+7,
+  "randomSeed": 2.0260702E+7,
+  "sourceDataset": "200_stab",
+  "magnetic_model": "IGRF-14 via MATLAB igrfmagm",
+  "source_magnetometer_file": "200_magn_stab.txt",
+  "source_navigation_file": "200_lla_stab.csv",
+  "row_count": 8496,
+  "anomaly_count": 8,
+  "segmentStarts": [
+    "2026-01-12T09:00:00Z",
+    "2026-01-18T11:30:00Z",
+    "2026-01-25T15:00:00Z",
+    "2026-02-10T08:15:00Z",
+    "2026-03-07T10:00:00Z",
+    "2026-03-21T17:45:00Z",
+    "2026-04-13T12:00:00Z",
+    "2026-05-04T07:30:00Z",
+    "2026-05-11T14:20:00Z",
+    "2026-05-19T19:10:00Z",
+    "2026-05-27T05:50:00Z",
+    "2026-06-16T16:40:00Z"
+  ],
+  "longitudeShiftPerSegmentDeg": 17.5,
+  "residual": {
+    "mode": "cyclic",
+    "robustSigmaMultiplier": 4,
+    "shiftStep": 97,
+    "scale": 1,
+    "biasMGs": 0,
+    "clipEnabled": false,
+    "clipMGs": [
+      -300,
+      300
+    ]
+  },
+  "injectAnomalies": true,
+  "units": {
+    "time": "UTC",
+    "altitude": "km",
+    "latitude_longitude": "deg",
+    "magnetic_field_model": "nT and mGs"
+  },
+  "note": "Educational semi-synthetic dataset. Not a scientific observation product."
+}

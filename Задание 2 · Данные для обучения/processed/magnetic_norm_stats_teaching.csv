@@ -1,0 +1,2 @@
+raw_rows,nan_or_non_numeric_rows,zero_time_rows,zero_vector_rows,zero_time_nonzero_vector_rows,rows_used_for_analysis,Bnorm_mean_mGs,Bnorm_median_mGs,Bnorm_std_mGs,Bnorm_min_mGs,Bnorm_max_mGs
+8496,7,3,17,3,8469,374.042675545708,370.388579736522,140.828582626963,0.871019679505536,655.795666307784

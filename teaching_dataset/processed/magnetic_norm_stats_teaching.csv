@@ -1,2 +1,0 @@
-raw_rows,nan_or_non_numeric_rows,zero_time_rows,zero_vector_rows,rows_used_for_magnetic_norm,B_norm_mean_mGs,B_norm_std_mGs,B_norm_min_mGs,B_norm_max_mGs
-8496,7,3,17,8486,373.293356021282,141.678067697016,0,655.795666307784

@@ -1,3 +1,5 @@
+# MATLAB working artifacts. Existing tracked .fig files can remain as history,
+# but new report figures should normally be exported as PNG.
 *.fig
 *.mat
 *.asv
@@ -6,7 +8,9 @@
 *.7z
 *.rar
 WORK_LOG.md
-results/analysis_summary_*.txt
+
+# Summary files belong in the summaries subdirectory.
+Задание 1 · Анализ данных/analysis_summary_*.txt
 
 # Исходные данные задания не должны попадать в репозиторий.
 *_magn_*.txt

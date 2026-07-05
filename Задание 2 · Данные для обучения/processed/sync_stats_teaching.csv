@@ -1,0 +1,2 @@
+sync_error_min_ms,sync_error_median_ms,sync_error_max_ms,points_within_100_ms,points_within_1_s,points_within_10_s,total_navigation_points
+0,0,60000,8469,8469,8473,8493
